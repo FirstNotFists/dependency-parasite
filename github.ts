@@ -5,6 +5,7 @@ import type {
   InfestationSeverity,
   HostProfile,
 } from './types'
+import { GITHUB_API_VERSION, DEPENDENCY_GROUPS } from './constants/parasite'
 
 export function parseGitHubUrl(input: string): { owner: string; repo: string } | null {
   let clean = input.trim()
@@ -37,11 +38,11 @@ async function githubFetch(owner: string, repo: string, endpoint: 'package.json'
     // Fallback: direct GitHub API (no token, local dev)
     if (endpoint === 'package.json') {
       return fetch(`https://api.github.com/repos/${owner}/${repo}/contents/package.json`, {
-        headers: { Accept: 'application/vnd.github.raw', 'X-GitHub-Api-Version': '2022-11-28' },
+        headers: { Accept: 'application/vnd.github.raw', 'X-GitHub-Api-Version': GITHUB_API_VERSION },
       })
     }
     return fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, {
-      headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+      headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': GITHUB_API_VERSION },
     })
   }
 }
@@ -51,7 +52,7 @@ export async function fetchPackageJson(owner: string, repo: string) {
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))
-    throw new Error((data as { error?: string }).error ?? 'GitHub에서 데이터를 가져오는 데 실패했습니다.')
+    throw new Error((data as { error?: string }).error ?? 'Failed to fetch data from GitHub.')
   }
   return res.json()
 }
@@ -120,14 +121,7 @@ export function buildAnalysis(
   registryData: Map<string, NpmRegistryResult>,
 ): AnalysisResult {
   const dependencies: Dependency[] = []
-  const groups: DependencyGroup[] = [
-    'dependencies',
-    'devDependencies',
-    'peerDependencies',
-    'optionalDependencies',
-  ]
-
-  for (const group of groups) {
+  for (const group of DEPENDENCY_GROUPS) {
     if (pkgJson[group]) {
       for (const [name, versionRange] of Object.entries(pkgJson[group] as Record<string, string>)) {
         const registry = registryData.get(name)

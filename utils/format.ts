@@ -7,3 +7,8 @@ export const formatBytes = (bytes: number): string => {
 
 export const seedRandom = (i: number): number =>
   ((i * 2654435761) >>> 0) / 4294967296
+
+export function calculatePercentage(current: number | null, total: number): string {
+  if (!current || total <= 0) return '—'
+  return ((current / total) * 100).toFixed(1)
+}

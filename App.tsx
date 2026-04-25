@@ -2,6 +2,7 @@ import { useState } from 'react'
 import LandingScreen from './components/LandingScreen/LandingScreen'
 import LoadingScreen from './components/LoadingScreen/LoadingScreen'
 import ResultScreen from './components/ResultScreen/ResultScreen'
+import ErrorScreen from './components/ErrorScreen/ErrorScreen'
 import {
   parseGitHubUrl,
   fetchPackageJson,
@@ -11,7 +12,7 @@ import {
 } from './github'
 import { generateCreatureDesigns } from './gemini'
 import type { AnalysisResult, AppPhase, DependencyGroup, LoadingStep } from './types'
-import './App.css'
+import { DEPENDENCY_GROUPS } from './constants/parasite'
 
 export default function App() {
   const [phase, setPhase] = useState<AppPhase>('landing')
@@ -24,7 +25,7 @@ export default function App() {
     const parsed = parseGitHubUrl(url)
     if (!parsed) {
       setPhase('error')
-      setErrorMsg('GitHub 레포지토리 URL 형식이 올바르지 않습니다.')
+      setErrorMsg('Invalid GitHub repository URL format.')
       return
     }
 
@@ -41,9 +42,8 @@ export default function App() {
       const languages = await fetchLanguages(parsed.owner, parsed.repo)
 
       setLoadingStep('fetch-registry')
-      const groups: DependencyGroup[] = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']
       const allDeps: { name: string; versionRange: string; group: DependencyGroup }[] = []
-      for (const g of groups) {
+      for (const g of DEPENDENCY_GROUPS) {
         if (pkgJson[g]) {
           for (const [name, ver] of Object.entries(pkgJson[g])) {
             allDeps.push({ name, versionRange: ver as string, group: g })
@@ -63,7 +63,7 @@ export default function App() {
       setPhase('result')
     } catch (err: unknown) {
       setPhase('error')
-      setErrorMsg(err instanceof Error ? err.message : '분석 중 오류가 발생했습니다.')
+      setErrorMsg(err instanceof Error ? err.message : 'An error occurred during analysis.')
     }
   }
 
@@ -82,17 +82,7 @@ export default function App() {
   }
 
   if (phase === 'error') {
-    return (
-      <div className="error-screen">
-        <div className="error-content">
-          <h2 className="error-title">분석 실패</h2>
-          <p className="error-msg">{errorMsg}</p>
-          <button className="error-button" onClick={handleReset}>
-            다시 시도
-          </button>
-        </div>
-      </div>
-    )
+    return <ErrorScreen message={errorMsg} onRetry={handleReset} />
   }
 
   return <LandingScreen onSubmit={handleSubmit} />

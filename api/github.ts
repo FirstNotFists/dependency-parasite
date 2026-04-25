@@ -60,10 +60,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!response.ok) {
         return res.status(response.status).json({
           error: response.status === 404
-            ? '레포지토리 또는 package.json을 찾을 수 없습니다.'
+            ? 'Repository or package.json not found.'
             : response.status === 403
-              ? 'GitHub API 요청 한도를 초과했습니다.'
-              : 'GitHub에서 데이터를 가져오는 데 실패했습니다.',
+              ? 'GitHub API rate limit exceeded. Please try again later.'
+              : 'Failed to fetch data from GitHub.',
         })
       }
 

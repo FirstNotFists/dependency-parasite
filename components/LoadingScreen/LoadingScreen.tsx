@@ -2,11 +2,11 @@ import type { LoadingStep } from '../../types'
 import './LoadingScreen.css'
 
 const STEP_LABELS: Record<LoadingStep, string> = {
-  'fetch-package': 'GitHub에서 package.json 수집 중...',
-  'fetch-languages': '레포지토리 언어 통계 분석 중...',
-  'fetch-registry': 'npm registry에서 전이 의존성 조회 중...',
-  analyzing: '기생 심각도 산출 중...',
-  'generating-creatures': 'Gemini AI로 기생체 디자인 생성 중...',
+  'fetch-package': 'Fetching package.json from GitHub...',
+  'fetch-languages': 'Analyzing repository language stats...',
+  'fetch-registry': 'Querying npm registry for transitive deps...',
+  analyzing: 'Calculating infestation severity...',
+  'generating-creatures': 'Generating creature designs with Gemini AI...',
 }
 
 const STEP_ORDER: LoadingStep[] = [

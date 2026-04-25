@@ -1,0 +1,26 @@
+export const PARTICLE_BASE_DURATION = 6
+export const PARTICLE_DURATION_RANGE = 6
+export const PARTICLE_DELAY_MAX = 8
+
+export const SWARM_ROTATION_SPEED = 0.11
+export const SWARM_ROTATION_X_AMP = 0.13
+export const SWARM_ROTATION_Z_AMP = 0.09
+
+export const INSPECT_SPEED_FACTOR = 0.15
+export const SELECTED_SPEED_FACTOR = 0.3
+
+export const HOST_PULSE_SPEED = 6.4
+export const HOST_PULSE_AMP = 0.11
+
+export const TETHER_PARTICLE_SPEED = 0.35
+export const TETHER_POINT_COUNT = 8
+export const TETHER_PARTICLE_COUNT = 2
+
+export const HIGHLIGHT_RING_PULSE_SPEED = 3
+export const HIGHLIGHT_RING_PULSE_AMP = 0.15
+export const HIGHLIGHT_LIGHT_INTENSITY = 12
+export const HIGHLIGHT_LIGHT_DISTANCE = 4
+
+export const ORBIT_AUTO_ROTATE_SPEED = 0.3
+export const ORBIT_ROTATE_SPEED = 0.6
+export const ORBIT_DAMPING = 0.08

@@ -97,9 +97,9 @@ RESPOND WITH VALID JSON ONLY (no markdown, no code blocks). The JSON must have t
   "report": {
     "speciesName": "A deeply creative, academic Latin-style binomial nomenclature name for this project's parasite colony (e.g., 'Modularis Parasiticus Reactiformis'). Should sound like a real biological classification with genus and species, reflecting the project's dominant dependencies and ecosystem.",
     "dangerLevel": "${result.infestationSeverity}",
-    "hostIntegrity": "X% / a witty Korean comment about the host's state",
-    "bioReport": "3-4 sentences in Korean. Written like an academic biological research paper abstract. Describe: the colony's feeding mechanism, dominant species within the colony, the host's survival prognosis, and the ecological significance of this infestation. Reference specific dependency names and the host ratio. Tone: scholarly, darkly poetic, with dry humor. Example style: '본 군락은 React 속(屬)을 중심으로 한 렌더링 기생 체계를 형성하였으며, 숙주 코드의 생존 가능 비율은 0.6%로 관측되었다. Three.js 아종의 3차원 시각 피질 장악이 특히 두드러지며...'",
-    "nakedHostComment": "1 sentence in Korean. What to display when all parasites are removed and only the tiny host remains. Should be emotionally impactful."
+    "hostIntegrity": "X% / a witty English comment about the host's state",
+    "bioReport": "3-4 sentences in English. Written like an academic biological research paper abstract. Describe: the colony's feeding mechanism, dominant species within the colony, the host's survival prognosis, and the ecological significance of this infestation. Reference specific dependency names and the host ratio. Tone: scholarly, darkly poetic, with dry humor. Example style: 'This colony has established a rendering-parasitic system centered around the React genus, with the host code's viable ratio observed at 0.6%. The Three.js subspecies' seizure of the 3D visual cortex is particularly pronounced...'",
+    "nakedHostComment": "1 sentence in English. What to display when all parasites are removed and only the tiny host remains. Should be emotionally impactful."
   },
   "creatures": [
     ${depsForCreatures
@@ -125,7 +125,7 @@ RESPOND WITH VALID JSON ONLY (no markdown, no code blocks). The JSON must have t
         "speedMultiplier": 0.3-1.5,
         "amplitude": 0.3-1.0
       },
-      "bioLabel": "4-5 sentences in Korean. Write like a detailed field observation entry from a parasitology research journal. Structure: (1) morphological traits and taxonomic position. (2) parasitic mechanism — how it infiltrates and exploits the host, translating the package's real function into biological terms. (3) host dependency — what happens if this species is removed. (4) ecological role — its status in the dependency ecosystem and relationships with other species. Be specific, scholarly, and darkly poetic."
+      "bioLabel": "4-5 sentences in English. Write like a detailed field observation entry from a parasitology research journal. Structure: (1) morphological traits and taxonomic position. (2) parasitic mechanism — how it infiltrates and exploits the host, translating the package's real function into biological terms. (3) host dependency — what happens if this species is removed. (4) ecological role — its status in the dependency ecosystem and relationships with other species. Be specific, scholarly, and darkly poetic."
     }`,
       )
       .join(',\n    ')}

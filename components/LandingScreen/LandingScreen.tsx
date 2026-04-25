@@ -33,7 +33,7 @@ export default function LandingScreen({ onSubmit }: LandingScreenProps) {
           Dependency<br />Parasite
         </h1>
         <p className="landing-sub">
-          당신의 코드는 그저 숙주일 뿐입니다.
+          Your code is just a host.
         </p>
 
         <form className="landing-form" onSubmit={handleSubmit}>
@@ -55,7 +55,7 @@ export default function LandingScreen({ onSubmit }: LandingScreenProps) {
         </form>
 
         <p className="landing-hint">
-          GitHub 레포지토리 URL을 입력하면 의존성 기생체를 분석합니다.
+          Enter a GitHub repository URL to analyze its dependency parasites.
         </p>
       </div>
 
