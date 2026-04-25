@@ -22,34 +22,25 @@ export function parseGitHubUrl(input: string): { owner: string; repo: string } |
 }
 
 export async function fetchPackageJson(owner: string, repo: string) {
-  const res = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/contents/package.json`,
-    {
-      headers: {
-        Accept: 'application/vnd.github.raw',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-    },
-  )
+  const res = await fetch('/api/github', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ owner, repo, endpoint: 'package.json' }),
+  })
 
   if (!res.ok) {
-    if (res.status === 404) throw new Error('레포지토리 또는 package.json을 찾을 수 없습니다.')
-    if (res.status === 403) throw new Error('GitHub API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.')
-    throw new Error('GitHub에서 데이터를 가져오는 데 실패했습니다.')
+    const data = await res.json().catch(() => ({}))
+    throw new Error((data as { error?: string }).error ?? 'GitHub에서 데이터를 가져오는 데 실패했습니다.')
   }
   return res.json()
 }
 
 export async function fetchLanguages(owner: string, repo: string): Promise<Record<string, number>> {
-  const res = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/languages`,
-    {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-    },
-  )
+  const res = await fetch('/api/github', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ owner, repo, endpoint: 'languages' }),
+  })
 
   if (!res.ok) return {}
   return res.json()
@@ -143,7 +134,6 @@ export function buildAnalysis(
   const totalCodeBytes = Object.values(languages).reduce((sum, b) => sum + b, 0)
   const depsWithSize = dependencies.filter(d => d.unpackedSize !== null)
   const knownExternalBytes = depsWithSize.reduce((sum, d) => sum + (d.unpackedSize ?? 0), 0)
-  // Only estimate for deps without size data if we have some reference
   const avgSize = depsWithSize.length > 0 ? knownExternalBytes / depsWithSize.length : 0
   const unknownCount = dependencies.length - depsWithSize.length
   const estimatedExternalBytes = knownExternalBytes + unknownCount * avgSize
