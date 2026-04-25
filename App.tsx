@@ -1,7 +1,8 @@
+import { useState, useMemo, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Line, OrbitControls, Sphere, Stars } from '@react-three/drei'
-import { useMemo, useRef } from 'react'
 import type { Group, Mesh } from 'three'
+import { parseGitHubUrl, fetchPackageJson, analyzeDependencies, type AnalysisResult } from './github'
 import './App.css'
 
 const HOST_RADIUS = 0.26
@@ -12,60 +13,13 @@ const WORM_SEGMENT_COUNT = 10
 const MAX_VISIBLE_DEPENDENCIES = 18
 
 const SAMPLE_DEPENDENCIES = [
-  'react',
-  'vite',
-  'typescript',
-  'eslint',
-  'three',
-  'zustand',
-  'axios',
-  'tailwindcss',
-  'lodash',
-  'date-fns',
-  'zod',
-  'react-query',
-  'framer-motion',
-  'firebase',
-  'supabase',
-  'storybook',
-  'vitest',
-  'prettier',
-  'd3',
-  'next',
-  'sharp',
-  'playwright',
-  'tanstack-router',
-  'sentry',
-  'msw',
-  'radix-ui',
-  'react-hook-form',
-  'yup',
-  'stripe',
-  'socket.io',
-  'prisma',
-  'graphql',
-  'apollo',
-  'postcss',
-  'sass',
-  'babel',
-  'rollup',
-  'webpack',
-  'lodash-es',
-  'immer',
-  'recoil',
-  'jotai',
-  'date-io',
-  'uuid',
-  'jsonwebtoken',
-  'bcrypt',
-  'nodemailer',
-  'cors',
-  'express',
-  'fastify',
-  'drizzle',
-  'react-spring',
-  'gsap',
-  'lucide-react',
+  'react', 'vite', 'typescript', 'eslint', 'three', 'zustand', 'axios', 'tailwindcss',
+  'lodash', 'date-fns', 'zod', 'react-query', 'framer-motion', 'firebase', 'supabase',
+  'storybook', 'vitest', 'prettier', 'd3', 'next', 'sharp', 'playwright', 'tanstack-router',
+  'sentry', 'msw', 'radix-ui', 'react-hook-form', 'yup', 'stripe', 'socket.io', 'prisma',
+  'graphql', 'apollo', 'postcss', 'sass', 'babel', 'rollup', 'webpack', 'lodash-es',
+  'immer', 'recoil', 'jotai', 'date-io', 'uuid', 'jsonwebtoken', 'bcrypt', 'nodemailer',
+  'cors', 'express', 'fastify', 'drizzle', 'react-spring', 'gsap', 'lucide-react'
 ]
 
 const PARASITE_COLORS = ['#a7ff12', '#39ff88', '#00e5ff', '#ff4df3', '#f6ff00', '#ff7a18']
@@ -81,10 +35,13 @@ type Parasite = {
   position: [number, number, number]
 }
 
-function createParasites(): Parasite[] {
-  return SAMPLE_DEPENDENCIES.slice(0, PARASITE_COUNT).map((name, index) => {
-    const normalizedY = 1 - (index / (PARASITE_COUNT - 1)) * 2
-    const orbitRadius = Math.sqrt(1 - normalizedY * normalizedY)
+function createParasites(dependencyNames: string[]): Parasite[] {
+  const count = dependencyNames.length
+  if (count === 0) return []
+
+  return dependencyNames.map((name, index) => {
+    const normalizedY = count > 1 ? 1 - (index / (count - 1)) * 2 : 0
+    const orbitRadius = count > 1 ? Math.sqrt(1 - normalizedY * normalizedY) : 1
     const theta = GOLDEN_ANGLE * index
     const ringNoise = 0.74 + (index % 7) * 0.06
     const size = 0.18 + (name.length % 7) * 0.032
@@ -109,7 +66,7 @@ function HostNucleus() {
 
   useFrame(({ clock }) => {
     const pulse = 1 + Math.sin(clock.elapsedTime * 6.4) * 0.11
-    hostRef.current?.scale.setScalar(pulse)
+    if (hostRef.current) hostRef.current.scale.setScalar(pulse)
   })
 
   return (
@@ -263,9 +220,9 @@ function WrithingTether({ parasite }: { parasite: Parasite }) {
   return <Line points={points} color={parasite.color} lineWidth={1.8} transparent opacity={0.34} />
 }
 
-function DependencySwarm() {
+function DependencySwarm({ dependencies }: { dependencies: string[] }) {
   const swarmRef = useRef<Group>(null)
-  const parasites = useMemo(() => createParasites(), [])
+  const parasites = useMemo(() => createParasites(dependencies), [dependencies])
 
   useFrame(({ clock }) => {
     if (swarmRef.current == null) return
@@ -279,17 +236,17 @@ function DependencySwarm() {
   return (
     <group ref={swarmRef} rotation={[0.1, -0.35, -0.04]}>
       <HostNucleus />
-      {parasites.map((parasite) => (
-        <WrithingTether key={`${parasite.name}-tether`} parasite={parasite} />
+      {parasites.map((parasite, i) => (
+        <WrithingTether key={`${parasite.name}-tether-${i}`} parasite={parasite} />
       ))}
-      {parasites.map((parasite) => (
-        <WriggleShell key={parasite.name} parasite={parasite} />
+      {parasites.map((parasite, i) => (
+        <WriggleShell key={`${parasite.name}-shell-${i}`} parasite={parasite} />
       ))}
     </group>
   )
 }
 
-function ParasiteScene() {
+function ParasiteScene({ dependencies }: { dependencies: string[] }) {
   return (
     <>
       <color attach="background" args={['#020301']} />
@@ -298,20 +255,56 @@ function ParasiteScene() {
       <directionalLight position={[5, 6, 3]} intensity={1.3} color="#c9ff8a" />
       <pointLight position={[-3, -2, 2]} color="#ff4df3" intensity={30} distance={7} />
       <Stars radius={70} depth={45} count={1600} factor={2.8} saturation={0.45} fade speed={0.9} />
-      <DependencySwarm />
+      <DependencySwarm dependencies={dependencies} />
       <OrbitControls enablePan={false} minDistance={4} maxDistance={9.5} autoRotate autoRotateSpeed={0.42} />
     </>
   )
 }
 
 function App() {
-  const parasiteNames = SAMPLE_DEPENDENCIES.slice(0, MAX_VISIBLE_DEPENDENCIES)
+  const [inputUrl, setInputUrl] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+  const [result, setResult] = useState<AnalysisResult | null>(null)
+
+  const handleScan = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const parsed = parseGitHubUrl(inputUrl)
+    if (!parsed) {
+      setStatus('error')
+      setErrorMsg('GitHub 레포지토리 URL 형식이 올바르지 않습니다.')
+      return
+    }
+
+    setStatus('loading')
+    setErrorMsg('')
+
+    try {
+      const pkgJson = await fetchPackageJson(parsed.owner, parsed.repo)
+      const analysis = analyzeDependencies(parsed.owner, parsed.repo, pkgJson)
+      setResult(analysis)
+      setStatus('success')
+    } catch (err: any) {
+      setStatus('error')
+      setErrorMsg(err.message || '분석 중 오류가 발생했습니다.')
+    }
+  }
+
+  const currentDeps = result 
+    ? result.dependencies.map(d => d.name) 
+    : SAMPLE_DEPENDENCIES.slice(0, PARASITE_COUNT);
+
+  // 최대 60개까지만 3D 렌더링 (성능 이슈)
+  const displayDeps = currentDeps.slice(0, 60);
+  
+  // 패널에 보여줄 의존성 이름 목록 (태그 클라우드 용)
+  const parasiteNames = currentDeps.slice(0, MAX_VISIBLE_DEPENDENCIES)
 
   return (
     <main className="app-shell">
       <section className="parasite-stage" aria-label="3D dependency parasite renderer">
         <Canvas camera={{ position: [0, 0.6, 7.2], fov: 52 }} dpr={[1, 2]}>
-          <ParasiteScene />
+          <ParasiteScene dependencies={displayDeps} />
         </Canvas>
       </section>
 
@@ -320,43 +313,72 @@ function App() {
         <h1 id="page-title">내 코드는 거들 뿐.</h1>
         <p className="hero-copy">
           아주 작은 금색 핵이 직접 작성한 코드입니다. 나머지는 dependency가 낳은 곰보 포자와 다지류
-          기생충입니다. 지금은 샘플 데이터지만, GitHub 스캔 결과에 따라 종과 체형이 바뀌는 구조를
-          증명하는 단계입니다.
+          기생충입니다. GitHub 스캔 결과에 따라 종과 체형이 바뀝니다.
         </p>
+
+        <form onSubmit={handleScan} style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '1rem' }}>
+          <input 
+            type="text" 
+            placeholder="https://github.com/facebook/react" 
+            value={inputUrl}
+            onChange={(e) => setInputUrl(e.target.value)}
+            disabled={status === 'loading'}
+            style={{ padding: '12px', background: '#111', border: '1px solid #333', color: '#fff', width: '100%' }}
+          />
+          <button 
+            type="submit" 
+            disabled={status === 'loading' || !inputUrl}
+            style={{ padding: '12px', background: '#ff4df3', color: '#000', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
+          >
+            {status === 'loading' ? '스캔 중...' : '분석 시작'}
+          </button>
+        </form>
+        {status === 'error' && <p style={{ color: '#ff4d4d', marginTop: '8px', fontSize: '14px' }}>{errorMsg}</p>}
       </section>
 
       <aside className="scan-panel" aria-label="기생충 분석 요약">
         <div>
-          <span>Species</span>
-          <strong>과체중 프론트엔드 기생수</strong>
+          <span>Repository</span>
+          <strong>{result ? result.repository : 'Sample Data'}</strong>
+        </div>
+        <div>
+          <span>Risk Level</span>
+          <strong style={{ color: result ? (result.riskLevel === 'Extremely High' ? '#ff4d4d' : '#a7ff12') : 'inherit' }}>
+            {result ? result.riskLevel : 'Unknown'}
+          </strong>
         </div>
         <div>
           <span>Host Integrity</span>
-          <strong>3% / Barely alive</strong>
+          <strong>{result ? `${result.hostIntegrity}% / Diminished` : '3% / Barely alive'}</strong>
         </div>
         <div>
           <span>Invasion Vector</span>
-          <strong>{PARASITE_COUNT} external proteins</strong>
+          <strong>{result ? `${result.dependencyCount} external proteins` : `${PARASITE_COUNT} external proteins`}</strong>
         </div>
       </aside>
 
       <section className="codex-card">
         <p className="codex-label">Ig Nobel style bio report</p>
-        <h2>숙주는 작고, node_modules는 굶주렸다.</h2>
+        <h2>{result ? '숙주는 작고, 의존성은 굶주렸다.' : '숙주는 작고, node_modules는 굶주렸다.'}</h2>
         <p>
-          이 생명체는 자신의 창조주를 중앙에 가둔 채 외부 단백질을 계속 증식시킵니다. 개발자는
-          창조주라기보다 먹이를 공급하는 사육사에 가깝습니다.
+          {result 
+            ? `이 프로젝트는 ${result.dependencyCount}개의 외부 단백질을 숙주 삼아 연명하고 있습니다. 직접 작성한 코드는 희미하게 빛나지만, 지휘권은 이미 외부 세계로 넘어갔을지도 모릅니다.` 
+            : '이 생명체는 자신의 창조주를 중앙에 가둔 채 외부 단백질을 계속 증식시킵니다. 개발자는 창조주라기보다 먹이를 공급하는 사육사에 가깝습니다.'
+          }
         </p>
         <div className="dependency-cloud" aria-label="렌더링에 사용한 샘플 의존성">
           {parasiteNames.map((dependency) => (
             <span key={dependency}>{dependency}</span>
           ))}
+          {currentDeps.length > MAX_VISIBLE_DEPENDENCIES && (
+            <span>+{currentDeps.length - MAX_VISIBLE_DEPENDENCIES} more...</span>
+          )}
         </div>
       </section>
 
       <div className="viewer-overlay">
         <span className="recording-dot" />
-        전체 격리실 렌더링 중
+        {status === 'loading' ? '레포지토리 스캔 중...' : '전체 격리실 렌더링 중'}
       </div>
     </main>
   )
