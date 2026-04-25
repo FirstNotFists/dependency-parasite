@@ -21,12 +21,33 @@ export function parseGitHubUrl(input: string): { owner: string; repo: string } |
   return null
 }
 
+async function githubFetch(owner: string, repo: string, endpoint: 'package.json' | 'languages') {
+  // Try serverless API first, fallback to direct GitHub API for local dev
+  try {
+    const res = await fetch('/api/github', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ owner, repo, endpoint }),
+    })
+    // If serverless route doesn't exist (local dev), res will be HTML 404
+    const contentType = res.headers.get('content-type') ?? ''
+    if (!contentType.includes('application/json')) throw new Error('Not JSON — fallback to direct')
+    return res
+  } catch {
+    // Fallback: direct GitHub API (no token, local dev)
+    if (endpoint === 'package.json') {
+      return fetch(`https://api.github.com/repos/${owner}/${repo}/contents/package.json`, {
+        headers: { Accept: 'application/vnd.github.raw', 'X-GitHub-Api-Version': '2022-11-28' },
+      })
+    }
+    return fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, {
+      headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+    })
+  }
+}
+
 export async function fetchPackageJson(owner: string, repo: string) {
-  const res = await fetch('/api/github', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ owner, repo, endpoint: 'package.json' }),
-  })
+  const res = await githubFetch(owner, repo, 'package.json')
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))
@@ -36,12 +57,7 @@ export async function fetchPackageJson(owner: string, repo: string) {
 }
 
 export async function fetchLanguages(owner: string, repo: string): Promise<Record<string, number>> {
-  const res = await fetch('/api/github', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ owner, repo, endpoint: 'languages' }),
-  })
-
+  const res = await githubFetch(owner, repo, 'languages')
   if (!res.ok) return {}
   return res.json()
 }
