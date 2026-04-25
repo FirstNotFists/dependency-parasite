@@ -300,13 +300,11 @@ function CameraController({ target, orbitRef }: { target: Parasite | null; orbit
     const orbit = orbitRef.current as unknown as { enabled: boolean; target: THREE.Vector3; update: () => void } | null
 
     if (target) {
-      // Camera offset so creature appears left-center (right side has the info panel)
+      // Camera directly in front of the creature, centered
       const [x, y, z] = target.position
       const creaturePos = new THREE.Vector3(x, y, z)
       const dir = creaturePos.clone().normalize()
-      const right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize()
-      // Move camera slightly to the LEFT so the creature is left-of-center
-      goalPos.current.copy(creaturePos).add(dir.multiplyScalar(2.0)).add(right.multiplyScalar(-0.8)).add(new THREE.Vector3(0, 0.15, 0))
+      goalPos.current.copy(creaturePos).add(dir.multiplyScalar(2.2)).add(new THREE.Vector3(0, 0.1, 0))
       goalLookAt.current.set(x, y, z)
 
       const dist = camera.position.distanceTo(goalPos.current)
