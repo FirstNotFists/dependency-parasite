@@ -141,10 +141,12 @@ export function buildAnalysis(
   const amplification = directCount > 0 ? totalParasiteCount / directCount : 0
 
   const totalCodeBytes = Object.values(languages).reduce((sum, b) => sum + b, 0)
-  const estimatedExternalBytes = dependencies.reduce(
-    (sum, d) => sum + (d.unpackedSize ?? 50_000),
-    0,
-  )
+  const depsWithSize = dependencies.filter(d => d.unpackedSize !== null)
+  const knownExternalBytes = depsWithSize.reduce((sum, d) => sum + (d.unpackedSize ?? 0), 0)
+  // Only estimate for deps without size data if we have some reference
+  const avgSize = depsWithSize.length > 0 ? knownExternalBytes / depsWithSize.length : 0
+  const unknownCount = dependencies.length - depsWithSize.length
+  const estimatedExternalBytes = knownExternalBytes + unknownCount * avgSize
   const hostRatio =
     totalCodeBytes + estimatedExternalBytes > 0
       ? totalCodeBytes / (totalCodeBytes + estimatedExternalBytes)

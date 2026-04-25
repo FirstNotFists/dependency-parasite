@@ -52,10 +52,10 @@ RESPOND WITH VALID JSON ONLY (no markdown, no code blocks). The JSON must have t
 
 {
   "report": {
-    "speciesName": "a creative Latin-style species name for this project's parasite colony",
+    "speciesName": "A deeply creative, academic Latin-style binomial nomenclature name for this project's parasite colony (e.g., 'Modularis Parasiticus Reactiformis'). Should sound like a real biological classification with genus and species, reflecting the project's dominant dependencies and ecosystem.",
     "dangerLevel": "${result.infestationSeverity}",
     "hostIntegrity": "X% / a witty Korean comment about the host's state",
-    "bioReport": "2-3 sentences in Korean. A darkly humorous biological specimen report about this project. Reference specific dependency names and the host ratio. Written like an Ig Nobel Prize paper.",
+    "bioReport": "3-4 sentences in Korean. Written like an academic biological research paper abstract. Describe: the colony's feeding mechanism, dominant species within the colony, the host's survival prognosis, and the ecological significance of this infestation. Reference specific dependency names and the host ratio. Tone: scholarly, darkly poetic, with dry humor. Example style: '본 군락은 React 속(屬)을 중심으로 한 렌더링 기생 체계를 형성하였으며, 숙주 코드의 생존 가능 비율은 0.6%로 관측되었다. Three.js 아종의 3차원 시각 피질 장악이 특히 두드러지며...'",
     "nakedHostComment": "1 sentence in Korean. What to display when all parasites are removed and only the tiny host remains. Should be emotionally impactful."
   },
   "creatures": [
@@ -63,7 +63,7 @@ RESPOND WITH VALID JSON ONLY (no markdown, no code blocks). The JSON must have t
       .map(
         (d) => `{
       "name": "${d.name}",
-      "creatureName": "Creative Latin-style creature name",
+      "creatureName": "Academic Latin binomial name reflecting this package's role (e.g., 'Fibrosus Rendericulum' for react-dom, 'Validatrix Schemensis' for zod). Must sound like a real biological species name.",
       "shape": {
         "body": "sphere|ellipsoid|torus|capsule|tapered|hooked",
         "segments": 1-8,
@@ -82,7 +82,7 @@ RESPOND WITH VALID JSON ONLY (no markdown, no code blocks). The JSON must have t
         "speedMultiplier": 0.3-1.5,
         "amplitude": 0.3-1.0
       },
-      "bioLabel": "1 sentence in Korean describing this parasite's behavior"
+      "bioLabel": "4-5 sentences in Korean. Write like a detailed field observation entry from a parasitology research journal. Structure: (1) 형태적 특징과 분류학적 위치 — 이 종이 어떤 계통에 속하며 어떤 형태적 특성을 가지는지. (2) 기생 메커니즘 — 숙주에 어떻게 침투하고 어떤 자원을 착취하는지. 패키지의 실제 기능을 생물학 용어로 번역. (3) 숙주 의존성 — 이 종이 제거되면 숙주에 어떤 영향이 생기는지. (4) 생태학적 역할 — 전체 의존성 생태계에서의 지위와 다른 종과의 관계. Example for 'react': '문(門) Renderia, 강(綱) Componentae에 속하는 대형 기생종. 가상 DOM이라는 독자적 효소 체계를 통해 숙주의 UI 렌더링 세포를 완전히 장악하며, 숙주는 이 종의 생명 주기(lifecycle) 없이는 단일 화면조차 구성할 수 없는 절대적 의존 관계를 형성한다. 전이 의존성으로 react-dom, scheduler 등 5종 이상의 하위 공생체를 거느리며, npm 생태계에서 가장 광범위한 숙주 감염률을 기록하는 지배종이다. 본 종의 제거 시 숙주의 즉각적이고 완전한 기능 상실이 예상된다.'"
     }`,
       )
       .join(',\n    ')}
@@ -101,7 +101,9 @@ IMPORTANT RULES:
 - Dev tools (eslint, prettier) → smaller capsule/torus, fewer appendages
 - Heavy deps (webpack, babel) → multi-segment, tendrils, writhe motion
 - Utility libs (lodash, date-fns) → ellipsoid with rings, drift motion
-- The bioLabel should reference what the package actually does, but described as parasitic behavior in Korean`
+- The bioLabel MUST be 2-3 sentences in Korean, written like a marine biologist's detailed field observation. Describe: (1) how this parasite feeds on the host, (2) what dependency it creates, (3) its ecological role. Reference the package's real functionality through biological metaphor. Be specific, scholarly, and darkly poetic — not generic.
+- The creatureName must sound like a real binomial nomenclature (Genus Species). Derive it from the package's actual function, not just its name. Example: typescript → 'Typosaurus Verificans', eslint → 'Lintococcus Purificans'.
+- The speciesName for the colony should reflect the project's dominant ecosystem and overall character.`
 }
 
 function buildFallbackCreatures(result: AnalysisResult): CreatureDesign[] {
@@ -130,7 +132,7 @@ function buildFallbackCreatures(result: AnalysisResult): CreatureDesign[] {
 
     return {
       name: dep.name,
-      creatureName: `Parasitus ${dep.name.charAt(0).toUpperCase()}${dep.name.slice(1, 4)}ensis`,
+      creatureName: `${dep.name.charAt(0).toUpperCase()}${dep.name.slice(1, 5)}osaurus ${dep.group === 'dependencies' ? 'Parasiticus' : 'Instrumentalis'}`,
       shape: {
         body: bodies[bodyIdx],
         segments,
@@ -158,7 +160,7 @@ function buildFallbackCreatures(result: AnalysisResult): CreatureDesign[] {
         speedMultiplier: 0.5 + (hash % 8) / 10,
         amplitude: 0.4 + (hash % 5) / 10,
       },
-      bioLabel: `${dep.name}에 의존하는 기생체. ${dep.transitiveCount}개의 하위 종을 거느린다.`,
+      bioLabel: `문(門) ${dep.group === 'dependencies' ? 'Runtimea' : 'Instrumentalia'}, 강(綱) Modularis에 속하는 ${dep.transitiveCount > 5 ? '대형' : dep.transitiveCount > 0 ? '중형' : '소형'} 기생종. 숙주의 ${dep.group === 'dependencies' ? '핵심 실행 환경' : '개발 도구 체계'}에 깊이 침투하여 ${dep.name} 효소를 분비하며 숙주의 대사 경로를 자체 생존에 유리하도록 재편한다. ${dep.transitiveCount > 0 ? `${dep.transitiveCount}개의 하위 공생체를 거느리며 독자적인 미생물 군락을 형성하고 있어, 단일 종 제거 시 연쇄적 생태계 붕괴가 예상된다.` : '독립적으로 기생하며 다른 종과의 의존 관계 없이 숙주에 직접 기생하는 단독 생활형으로 관찰된다.'} 본 종의 완전한 적출 시 숙주의 해당 기능 영역에 즉각적인 기능 저하가 발생할 것으로 판단된다.`,
     }
   })
 }
