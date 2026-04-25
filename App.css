@@ -1,0 +1,224 @@
+.app-shell {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 47%, rgba(118, 255, 32, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(2, 3, 1, 0.2), rgba(2, 3, 1, 0.92));
+  box-sizing: border-box;
+}
+
+.app-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(157, 255, 111, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(157, 255, 111, 0.055) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 74%);
+}
+
+.app-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(transparent 50%, rgba(0, 0, 0, 0.18) 50%),
+    radial-gradient(circle at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.72) 100%);
+  background-size: 100% 4px, 100% 100%;
+  mix-blend-mode: multiply;
+}
+
+.parasite-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.parasite-stage canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-panel,
+.codex-card,
+.scan-panel,
+.viewer-overlay {
+  border: 1px solid rgba(157, 255, 111, 0.2);
+  background:
+    linear-gradient(135deg, rgba(77, 255, 0, 0.11), transparent 44%),
+    rgba(2, 5, 3, 0.63);
+  box-shadow:
+    0 24px 90px rgba(0, 0, 0, 0.42),
+    inset 0 0 32px rgba(118, 255, 32, 0.035);
+  backdrop-filter: blur(18px);
+}
+
+.hero-panel {
+  position: absolute;
+  left: 28px;
+  top: 28px;
+  z-index: 3;
+  width: min(520px, calc(100vw - 56px));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 26px;
+  border-radius: 24px;
+}
+
+.eyebrow,
+.codex-label,
+.viewer-overlay {
+  color: #9dff6f;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero-panel h1 {
+  margin: 12px 0;
+  color: #fff7c7;
+  font-family: var(--heading);
+  font-size: clamp(44px, 5vw, 78px);
+  line-height: 0.86;
+  letter-spacing: -0.08em;
+  text-shadow: 0 0 28px rgba(255, 216, 107, 0.22);
+}
+
+.hero-copy {
+  color: #c2cfb8;
+  font-size: 15px;
+}
+
+.scan-panel {
+  position: absolute;
+  right: 28px;
+  top: 28px;
+  z-index: 3;
+  width: min(360px, calc(100vw - 56px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 22px;
+}
+
+.scan-panel div {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.scan-panel span {
+  color: #9dff6f;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.scan-panel strong {
+  color: #f8ffd2;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.viewer-overlay {
+  position: absolute;
+  right: 28px;
+  bottom: 28px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+}
+
+.recording-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #4dff00;
+  box-shadow: 0 0 14px #4dff00;
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+.codex-card {
+  position: absolute;
+  left: 28px;
+  bottom: 28px;
+  z-index: 3;
+  width: min(760px, calc(100vw - 56px));
+  padding: 22px;
+  border-radius: 24px;
+}
+
+.codex-card h2 {
+  margin: 10px 0;
+  color: #fff7c7;
+  font-size: 26px;
+}
+
+.codex-card p:not(.codex-label) {
+  color: #aeb8a4;
+}
+
+.dependency-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.dependency-cloud span {
+  padding: 7px 10px;
+  border: 1px solid rgba(77, 255, 0, 0.22);
+  border-radius: 999px;
+  color: #ddffd4;
+  background: rgba(77, 255, 0, 0.07);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.72);
+  }
+}
+
+@media (max-width: 980px) {
+  .hero-panel,
+  .scan-panel,
+  .codex-card,
+  .viewer-overlay {
+    position: relative;
+    inset: auto;
+    width: auto;
+    margin: 16px;
+  }
+
+  .app-shell {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .parasite-stage {
+    position: fixed;
+  }
+}
